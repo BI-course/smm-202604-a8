@@ -8,9 +8,9 @@
 
 | **Details**                                                                                                                           | **Comment** |
 |:--------------------------------------------------------------------------------------------------------------------------------------|:------------|
-| **Student ID**                                                                                                                        |             |
-| **Name**                                                                                                                              |             |
-| **What part of the lab did you personally<br/>contribute to (provide a link to the<br/>branch(es)), and what did you learn from it?** |             |
+| **Student ID**                                                                                                                        | 158430 |
+| **Name**                                                                                                                              | Yeshua Muhotani Kimani |
+| **What part of the lab did you personally<br/>contribute to (provide a link to the<br/>branch(es)), and what did you learn from it?** | **Contribution:** I set up the shared `api.py` skeleton with all four routes and the regression endpoint (rental price prediction). The endpoint loads our saved Ridge pipeline from disk with `joblib` and does not retrain. It checks for missing inputs and returns a clear error listing them. I converted the log-transformed prediction back to real rent using `np.expm1`. I tested it locally with `curl`. I also organised the group and will record the group video and compile this submission file.<br/><br/>**Branch:** https://github.com/BI-course/smm-202604-a8/tree/feature/regression<br/><br/>**What I learned:** A saved pipeline carries all its preprocessing, so the API only needs to pass the raw inputs to it. Library versions matter: my model was saved with scikit-learn 1.6.1 but my laptop had 1.9.0, and the model would not load until I installed the matching versions in a virtual environment. I also learned to check whether the target was transformed, because without converting it back the API returned 11.81 instead of a realistic rent of about KES 134,000. |
 
 **Member 2:**
 
