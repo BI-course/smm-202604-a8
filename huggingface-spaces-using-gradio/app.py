@@ -156,7 +156,7 @@ with gr.Blocks(title="BBT 4206 Model Validation Demos") as demo:
                 # OrdinalEncoder was fitted on -- any other string raises
                 # "Found unknown categories" at predict time.
                 gr.Dropdown(label="Owner Education Level",
-                            choices=["Primary", "Secondary", "Tertiary", "Postgraduate"],
+                            choices=["Primary", "Secondary", "Certificate", "Bachelors", "Masters" ],
                             value="Secondary"),
                 gr.Number(label="Monthly Marketing Spend (KES)", value=45000),
                 gr.Number(label="Avg Daily Foot Traffic (leave 0 if not applicable)", value=0),
