@@ -23,9 +23,9 @@
 
 | **Details**                                                                                                                           | **Comment** |
 |:--------------------------------------------------------------------------------------------------------------------------------------|:------------|
-| **Student ID**                                                                                                                        |             |
-| **Name**                                                                                                                              |             |
-| **What part of the lab did you personally<br/>contribute to (provide a link to the<br/>branch(es)), and what did you learn from it?** |             |
+| **Student ID**                                                                                                                        |       171029           |
+| **Name**                                                                                                                              |Marwa Mohamed             |
+| **What part of the lab did you personally<br/>contribute to (provide a link to the<br/>branch(es)), and what did you learn from it?** |**Contribution:** I built the clustering endpoint (`/api/v1/models/retail-store-clusterer/predictions`) for our retail store K-Means model. Our notebook had saved the model only inside Colab, so I re-saved it (StandardScaler + K-Means, k=4) by re-running the notebook's final-model steps with scikit-learn 1.6.1, and checked that all 400 stores got the same clusters as in the notebook. The endpoint loads the model from disk and does not retrain, applies the saved scaler before predicting, returns the cluster number and segment name, and returns a 400 error for missing or non-numeric inputs. I tested it with `curl` using real store rows. I also built one Streamlit app with a tab for each of our four models, using the same saved model files and pinned library versions, and published it on Streamlit Community Cloud.<br/><br/>**Branches:**<br/>https://github.com/BI-course/smm-202604-a8/tree/feature/clustering<br/>Streamlit app: https://smm-202604-a8-group.streamlit.app/<br/><br/>**What I learned:** K-Means depends on the scale of each feature, so the API must use the same fitted scaler from training, or stores land in the wrong cluster without any error. Streamlit re-runs the whole script on every click, so `@st.cache_resource` is needed to load the models only once. A hosted app needs the same library versions as the laptop where the models were saved, or the files will not load.             |
 
 **Member 4:**
 
@@ -71,7 +71,7 @@ Fill in only the rows that apply to your chosen difficulty level (see Part C bel
 |:--------------------------------------------------|:--------|
 | Render (the full `api.py`, all endpoints)         |  https://smm-202604-a8.onrender.com       |
 | Hugging Face Space (Gradio, one tab per model)    |     https://huggingface.co/spaces/GibsonKing/sme-credit-risk-classifier     |
-| Streamlit Community Cloud app (one tab per model) |         |
+| Streamlit Community Cloud app (one tab per model) |   https://smm-202604-a8-group.streamlit.app/      |
 
 ---
 
