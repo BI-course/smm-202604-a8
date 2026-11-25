@@ -63,11 +63,50 @@ def predict_rental_price():
 
 
 # ---------------------------------------------------------------
-# 2. CLASSIFICATION (Gibson) -- employee attrition
+# 2. CLASSIFICATION (Gibson)
 # ---------------------------------------------------------------
+# TODO: swap in the group's attrition classifier when it is available
+# (change the file name, CLASSIFICATION_FEATURES and the "model" label only)
+classification_model = joblib.load(
+    os.path.join(MODEL_DIR, "svc_classifier_for_sme_credit_risk.joblib")
+)
+
+CLASSIFICATION_FEATURES = [
+    "sector", "county", "quarter", "loan_purpose", "owner_education_level",
+    "business_age_years", "num_employees", "monthly_revenue_kes",
+    "loan_amount_kes", "loan_term_months", "interest_rate_pct",
+    "collateral_value_kes", "debt_to_income_ratio", "credit_score",
+    "num_previous_loans", "missed_payments_count", "online_presence_score",
+    "customer_satisfaction_score", "competitor_density",
+]
+
+
 @app.route("/api/v1/models/employee-attrition-classifier/predictions", methods=["POST"])
 def predict_attrition():
-    return jsonify({"error": "Not implemented yet"}), 501
+    payload = request.get_json(silent=True)
+    if not payload:
+        return jsonify({"error": "Send a JSON body"}), 400
+
+    missing = [f for f in CLASSIFICATION_FEATURES if f not in payload]
+    if missing:
+        return jsonify({"error": "Missing inputs", "missing": missing}), 400
+
+    try:
+        input_row = pd.DataFrame([payload])[CLASSIFICATION_FEATURES]
+        pred = classification_model.predict(input_row)[0]
+        result = {
+            "prediction": pred.item() if hasattr(pred, "item") else pred,
+            "model": "SVC Classifier",
+        }
+        if hasattr(classification_model, "predict_proba"):
+            probs = classification_model.predict_proba(input_row)[0]
+            result["probabilities"] = {
+                str(c): float(p)
+                for c, p in zip(classification_model.classes_, probs)
+            }
+        return jsonify(result), 200
+    except (ValueError, TypeError) as e:
+        return jsonify({"error": "Invalid input values", "detail": str(e)}), 400
 
 
 # ---------------------------------------------------------------
