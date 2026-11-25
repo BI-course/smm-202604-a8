@@ -1,4 +1,2 @@
 # requirements/prod.txt
--r https://raw.githubusercontent.com/course-files/ServingMLModels/refs/heads/main/requirements/base.txt
-
 gunicorn
