@@ -141,9 +141,58 @@ def predict_credit_risk():
 # ---------------------------------------------------------------
 # 3. CLUSTERING (David) -- retail stores
 # ---------------------------------------------------------------
+# Load the saved package once when the server starts (never retrain here).
+# The notebook saved a dict: {"scaler": StandardScaler, "kmeans": KMeans (k=4), "features": [...]}
+clustering_artifact = joblib.load(
+    os.path.join(MODEL_DIR, "retail_store_kmeans_model.joblib")
+)
+clustering_scaler = clustering_artifact["scaler"]
+clustering_kmeans = clustering_artifact["kmeans"]
+
+# The exact column names (and order) the model was trained on
+CLUSTERING_FEATURES = clustering_artifact["features"]
+# = ["monthly_revenue_kes", "daily_foot_traffic", "staff_count", "avg_basket_size_kes"]
+
+# Segment names from the notebook's cluster-profiling section
+CLUSTER_NAMES = {
+    0: "High-Traffic Mid-Performing Stores",
+    1: "High-Performance Large-Scale Stores",
+    2: "High-Basket, Low-Traffic Stores",
+    3: "Low-Performance, Low-Traffic Stores",
+}
+
+
 @app.route("/api/v1/models/retail-store-clusterer/predictions", methods=["POST"])
 def predict_store_cluster():
-    return jsonify({"error": "Not implemented yet"}), 501
+    # Read the JSON body (silent=True gives None instead of crashing on bad JSON)
+    payload = request.get_json(silent=True)
+    if not payload:
+        return jsonify({"error": "Send a JSON body"}), 400
+
+    # Basic error handling: tell the user which inputs are missing
+    missing = [f for f in CLUSTERING_FEATURES if f not in payload or payload[f] in (None, "")]
+    if missing:
+        return jsonify({"error": "Missing inputs", "missing": missing}), 400
+
+    # K-Means works on numbers only, so reject text values clearly
+    try:
+        input_row = pd.DataFrame([payload])[CLUSTERING_FEATURES].astype(float)
+    except (ValueError, TypeError):
+        return jsonify({
+            "error": "All inputs must be numbers",
+            "expected_features": CLUSTERING_FEATURES,
+        }), 400
+
+    # Apply the SAME fitted scaler from training first, then predict the cluster
+    scaled_row = clustering_scaler.transform(input_row)
+    cluster = int(clustering_kmeans.predict(scaled_row)[0])
+
+    return jsonify({
+        "cluster": cluster,
+        "cluster_name": CLUSTER_NAMES.get(cluster, f"Cluster {cluster}"),
+        "model": "K-Means Clustering (k=4) - Retail Stores",
+    }), 200
+
 
 
 # ---------------------------------------------------------------
