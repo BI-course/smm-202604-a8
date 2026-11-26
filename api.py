@@ -92,7 +92,7 @@ EMPLOYEE_ATTRITION_FEATURES = [
     "performance_rating",
 ]
 
-# Features that must contain numeric values.
+# Nine numeric features.
 EMPLOYEE_ATTRITION_NUMERIC_FEATURES = [
     "years_since_last_promotion",
     "monthly_salary_kes",
@@ -105,7 +105,7 @@ EMPLOYEE_ATTRITION_NUMERIC_FEATURES = [
     "bonus_amount_kes",
 ]
 
-# Categorical features.
+# Four categorical features.
 EMPLOYEE_ATTRITION_CATEGORICAL_FEATURES = [
     "department",
     "job_role_level",
@@ -120,6 +120,7 @@ EMPLOYEE_ATTRITION_CATEGORICAL_FEATURES = [
 )
 def predict_employee_attrition():
 
+    # Read incoming JSON request.
     payload = request.get_json(silent=True)
 
     if not isinstance(payload, dict):
@@ -127,11 +128,12 @@ def predict_employee_attrition():
             "error": "Send a valid JSON object"
         }), 400
 
-    # Check for missing features.
+    # Check for missing or empty features.
     missing = [
         feature
         for feature in EMPLOYEE_ATTRITION_FEATURES
-        if feature not in payload or payload[feature] is None
+        if feature not in payload
+        or payload[feature] is None
         or payload[feature] == ""
     ]
 
@@ -142,43 +144,64 @@ def predict_employee_attrition():
         }), 400
 
     try:
-        # Build input DataFrame using the exact training feature order.
+        # Create DataFrame using the exact training feature order.
         input_row = pd.DataFrame(
             [payload],
             columns=EMPLOYEE_ATTRITION_FEATURES
         )
 
+        # ----------------------------------------------------
         # Validate numeric fields.
+        # ----------------------------------------------------
         for feature in EMPLOYEE_ATTRITION_NUMERIC_FEATURES:
+
             input_row[feature] = pd.to_numeric(
                 input_row[feature],
                 errors="raise"
             )
 
+            # Reject NaN and infinite numeric values.
             if not np.isfinite(input_row[feature].iloc[0]):
                 raise ValueError(
                     f"{feature} must contain a finite number"
                 )
 
+        # IMPORTANT:
+        # Convert all nine numeric columns to float64.
+        # This prevents int64/float64 incompatibility errors
+        # when the frontend sends whole numbers.
+        input_row[EMPLOYEE_ATTRITION_NUMERIC_FEATURES] = (
+            input_row[EMPLOYEE_ATTRITION_NUMERIC_FEATURES].astype(float)
+        )
+
+        # ----------------------------------------------------
         # Validate categorical fields.
+        # ----------------------------------------------------
         for feature in EMPLOYEE_ATTRITION_CATEGORICAL_FEATURES:
+
             if not isinstance(input_row[feature].iloc[0], str):
                 raise ValueError(
                     f"{feature} must contain text"
                 )
 
-        # Predict using the complete fitted pipeline.
+        # ----------------------------------------------------
+        # Make prediction using the complete fitted pipeline.
+        # ----------------------------------------------------
         prediction = employee_attrition_model.predict(
             input_row
         )[0]
 
+        # Prepare prediction response.
         result = {
             "prediction": str(prediction),
             "model": "Tuned Logistic Regression - Employee Attrition"
         }
 
-        # Include class probabilities where supported.
+        # ----------------------------------------------------
+        # Calculate class probabilities where supported.
+        # ----------------------------------------------------
         if hasattr(employee_attrition_model, "predict_proba"):
+
             probabilities = employee_attrition_model.predict_proba(
                 input_row
             )[0]
@@ -193,8 +216,11 @@ def predict_employee_attrition():
                 )
             }
 
+            # Extract probability of employee attrition (Yes).
             if "Yes" in classes:
+
                 yes_index = list(classes).index("Yes")
+
                 result["probability_of_attrition"] = float(
                     probabilities[yes_index]
                 )
@@ -202,10 +228,12 @@ def predict_employee_attrition():
         return jsonify(result), 200
 
     except (ValueError, TypeError) as e:
+
         return jsonify({
             "error": "Invalid input values",
             "detail": str(e)
         }), 400
+
 
 
 # ---------------------------------------------------------------
