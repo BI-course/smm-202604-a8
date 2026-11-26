@@ -61,7 +61,7 @@
 │   ├── RequestFlow.jpg
 │   ├── api_consumer.py
 │   ├── api_consumer_from_dev_flask.py
-│   ├── ecommerce_recommender.html
+│   ├── music_track_recommender.html
 │   ├── index.html
 │   ├── mall_customer_segmenter.html
 │   ├── sme_credit_risk_classifier.html

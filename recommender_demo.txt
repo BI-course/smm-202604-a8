@@ -43,7 +43,6 @@ Keep the API address http://127.0.0.1:5000.
 The default input M01, M03 recommends Pump It Up (M02):
 confidence 0.8675 (86.75%), lift 5.9456, support 0.0389.
 Delete the track IDs and submit to demonstrate the missing-input error.
-The older ecommerce_recommender.html URL redirects to the music page.
 
 Working request (Git Bash)
   curl -X POST http://127.0.0.1:5000/api/v1/models/music-track-recommender/predictions -H "Content-Type: application/json" --data-raw '{"track_ids":["M01","M03"],"top_n":5}'
