@@ -139,7 +139,7 @@ def predict_credit_risk():
         }), 400
 
 # ---------------------------------------------------------------
-# 3. CLUSTERING (David) -- retail stores
+# 3. CLUSTERING (Marwa) -- retail stores
 # ---------------------------------------------------------------
 # Load the saved package once when the server starts (never retrain here).
 # The notebook saved a dict: {"scaler": StandardScaler, "kmeans": KMeans (k=4), "features": [...]}
@@ -196,11 +196,61 @@ def predict_store_cluster():
 
 
 # ---------------------------------------------------------------
-# 4. RECOMMENDER (Marwa) -- music tracks
+# 4. RECOMMENDER (David Usyu Mutinda, 169382) -- association-rule product recommendations
 # ---------------------------------------------------------------
-@app.route("/api/v1/models/music-track-recommender/predictions", methods=["POST"])
-def recommend_tracks():
-    return jsonify({"error": "Not implemented yet"}), 501
+# Load the existing mined rules once. No training or rule mining happens here.
+recommender_artifact = joblib.load(
+    os.path.join(MODEL_DIR, "apriori_recommendation_rules.joblib")
+)
+recommendation_lookup = recommender_artifact["recommendation_lookup"]
+sku_lookup = recommender_artifact["sku_lookup"]
+
+
+@app.route("/api/v1/models/ecommerce-recommender/predictions", methods=["POST"])
+def recommend_products():
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return jsonify({"error": "Send a JSON object with a cart list"}), 400
+
+    cart = payload.get("cart")
+    if not isinstance(cart, list) or not cart:
+        return jsonify({"error": "cart must be a non-empty list of product SKUs"}), 400
+    if any(not isinstance(sku, str) or not sku.strip() for sku in cart):
+        return jsonify({"error": "Each cart SKU must be a non-empty string"}), 400
+
+    top_n = payload.get("top_n", 3)
+    if type(top_n) is not int or not 1 <= top_n <= 20:
+        return jsonify({"error": "top_n must be an integer between 1 and 20"}), 400
+
+    cart = {sku.strip() for sku in cart}
+    unknown = sorted(cart.difference(sku_lookup.index))
+    if unknown:
+        return jsonify({"error": "Unknown product SKUs", "unknown_skus": unknown}), 400
+
+    # A rule fires only when ALL its antecedents are in the cart. Keep each
+    # unseen product's strongest rule, ranked by confidence then lift.
+    best = {}
+    for antecedent, candidates in recommendation_lookup.items():
+        if antecedent.issubset(cart):
+            for sku, confidence, lift in candidates:
+                score = (float(confidence), float(lift))
+                if sku not in cart and (sku not in best or score > best[sku]):
+                    best[sku] = score
+
+    ranked = sorted(best.items(), key=lambda item: (-item[1][0], -item[1][1], item[0]))[:top_n]
+    return jsonify({
+        "cart": sorted(cart),
+        "recommendations": [
+            {
+                "sku": sku,
+                "product_name": str(sku_lookup.loc[sku, "product_name"]),
+                "confidence": round(confidence, 4),
+                "lift": round(lift, 4),
+            }
+            for sku, (confidence, lift) in ranked
+        ],
+        "model": "Apriori association rules",
+    }), 200
 
 
 if __name__ == "__main__":

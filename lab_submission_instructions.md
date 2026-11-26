@@ -2,6 +2,8 @@
 
 ## Student Details and Individual Member Contributions
 
+**Duty swap:** David Usyu Mutinda and Marwa swapped their originally assigned tasks. David completed the association-rules recommender endpoint and HTML/CSS/JS page; Marwa completed the clustering endpoint and Streamlit app.
+
 **Name of the team on GitHub Classroom:**
 
 **Member 1:**
@@ -31,9 +33,9 @@
 
 | **Details**                                                                                                                           | **Comment** |
 |:--------------------------------------------------------------------------------------------------------------------------------------|:------------|
-| **Student ID**                                                                                                                        |             |
-| **Name**                                                                                                                              |             |
-| **What part of the lab did you personally<br/>contribute to (provide a link to the<br/>branch(es)), and what did you learn from it?** |             |
+| **Student ID**                                                                                                                        | 169382 |
+| **Name**                                                                                                                              | David Usyu Mutinda |
+| **What part of the lab did you personally<br/>contribute to (provide a link to the<br/>branch(es)), and what did you learn from it?** | **Contribution:** I completed the association-rules recommender endpoint (`/api/v1/models/ecommerce-recommender/predictions`) and the HTML/CSS/JavaScript page (`frontend/ecommerce_recommender.html`), following a duty swap with Marwa. The endpoint loads the existing saved rules once at startup, returns product names, confidence and lift, excludes products already in the cart, and validates missing inputs, invalid counts and unknown SKUs. The page calls the API and displays clear missing-input and request-error messages. I fixed the artifact's pandas compatibility by re-saving the existing data for the repository's pinned pandas version, preserving all 56 rules, the recommendation lookup and all 35 product records without retraining. Verification passed eight API tests, six page-script checks and 46 live HTTP checks, including comparison with all 40 distinct saved rule antecedents. The live sample cart `H06, H07` returned Electric Kettle with 93.85% confidence. Requests and responses are recorded in `evidence/recommender_live_test.json`.<br/><br/>**Branch:** https://github.com/BI-course/smm-202604-a8/tree/feature/recommender.<br/><br/>**Learning points:** Association-rule inference matches saved antecedents against the cart rather than retraining a model. Confidence and lift rank recommendations, and products already selected must be excluded. Validation is needed in both the browser and API, and saved artifacts must be compatible with the deployment's library versions. |
 
 **Member 5:**
 

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="David Usyu Mutinda, 169382">
 <title>E-Commerce Recommender</title>
 <style>
   :root {
@@ -44,7 +45,7 @@
   }
   h1 { font-size: 22px; margin: 0 0 4px; }
   p.lead { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
-  label { display: block; font-size: 13px; font-weight: 600; margin: 16px 0 6px; }
+  label { display: block; font-size: 14px; font-weight: 600; margin: 16px 0 6px; }
   label .hint { font-weight: 400; color: var(--muted); }
   input {
     width: 100%; padding: 10px 12px; border: 1px solid var(--border);
@@ -67,7 +68,7 @@
   ul.recs { list-style: none; margin: 10px 0 0; padding: 0; }
   ul.recs li {
     padding: 8px 0; border-bottom: 1px solid var(--border);
-    display: flex; justify-content: space-between; font-size: 14px;
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; font-size: 14px;
   }
   ul.recs li:last-child { border-bottom: none; }
   ul.recs .meta { color: var(--muted); font-size: 12px; }
@@ -75,82 +76,112 @@
 </head>
 <body>
   <div class="card">
-    <a class="back-link" href="index.html">&larr; All endpoints</a>
+    <a class="back-link" href="index.html">All endpoints</a>
     <span class="badge">Association Rules</span>
     <h1>Shopping Cart Recommender</h1>
     <p class="lead">Calls <code>POST /api/v1/models/ecommerce-recommender/predictions</code></p>
 
-    <form id="predictForm">
+    <form id="predictForm" novalidate>
+      <label for="api_base">API Address</label>
+      <input type="url" id="api_base" required aria-describedby="api_hint">
+      <p class="lead" id="api_hint">Use the local Flask address or your deployed API address.</p>
       <label for="cart">Cart SKUs <span class="hint">(comma-separated, e.g. P01, P04 or H06, H07)</span></label>
-      <input type="text" id="cart" value="P01, P04" required>
+      <input type="text" id="cart" value="H06, H07" required>
 
       <label for="top_n">Number of Recommendations</label>
-      <input type="number" id="top_n" value="3" min="1" max="10" required>
+      <input type="number" id="top_n" value="3" min="1" max="20" step="1" required>
 
       <button type="submit" id="submitBtn">Get Recommendations</button>
     </form>
 
-    <div id="result"></div>
+    <div id="result" role="status" aria-live="polite"></div>
+    <p class="lead" style="margin: 24px 0 0;">Developed by David Usyu Mutinda &middot; 169382</p>
   </div>
 
 <script>
-  const protocol = window.location.protocol;                 // "http:", "https:", or "file:"
-  const hostname = window.location.hostname || "127.0.0.1";  // hostname is "" for a file:// page
-  const isSecure = protocol === "https:";
+  const apiBase = document.getElementById("api_base");
+  const cartInput = document.getElementById("cart");
+  const countInput = document.getElementById("top_n");
+  const result = document.getElementById("result");
+  const submitBtn = document.getElementById("submitBtn");
+  apiBase.value = window.location.protocol === "file:" ? "http://127.0.0.1:5000"
+    : ["localhost", "127.0.0.1"].includes(window.location.hostname)
+      ? `http://${window.location.hostname}:5000` : window.location.origin;
 
-  const API_ORIGIN = `${isSecure ? "https" : "http"}://${hostname}:${isSecure ? "443" : "5000"}`;
-  const API_URL = `${API_ORIGIN}/api/v1/models/ecommerce-recommender/predictions`;
+  function showError(message, input) {
+    result.className = "show err";
+    result.textContent = message;
+    if (input) input.focus();
+  }
 
-  // const API_URL = "http://127.0.0.1:5000/api/v1/models/ecommerce-recommender/predictions";
-
-  document.getElementById("predictForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const submitBtn = document.getElementById("submitBtn");
-    const result = document.getElementById("result");
-
-    const cartSkus = document.getElementById("cart").value
-      .split(",")
-      .map(s => s.trim())
-      .filter(s => s.length > 0);
-
-    const payload = {
-      cart: cartSkus,
-      top_n: parseInt(document.getElementById("top_n").value),
-    };
+  document.getElementById("predictForm").addEventListener("submit", async function (event) {
+    event.preventDefault();
+    result.replaceChildren();
+    result.className = "";
+    const cart = [...new Set(cartInput.value.split(",").map(sku => sku.trim()).filter(Boolean))];
+    if (!cart.length) {
+      showError("Enter at least one product SKU before requesting recommendations.", cartInput);
+      return;
+    }
+    const topN = Number(countInput.value);
+    if (!Number.isInteger(topN) || topN < 1 || topN > 20) {
+      showError("Enter a whole number from 1 to 20 for the recommendation count.", countInput);
+      return;
+    }
+    let base;
+    try {
+      base = new URL(apiBase.value.trim());
+      if (!["http:", "https:"].includes(base.protocol)) throw new Error();
+    } catch {
+      showError("Enter a valid API address beginning with http:// or https://.", apiBase);
+      return;
+    }
 
     submitBtn.disabled = true;
     submitBtn.textContent = "Fetching...";
-    result.className = "";
-
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 90000);
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch(new URL("/api/v1/models/ecommerce-recommender/predictions", base), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ cart, top_n: topN }),
+        signal: controller.signal,
       });
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        throw new Error(`The API returned an unreadable response (HTTP ${response.status}).`);
+      }
       if (!response.ok) {
-        const text = await response.text();
-        throw new Error(`Server responded ${response.status}: ${text.slice(0, 200)}`);
+        const detail = data.unknown_skus ? `: ${data.unknown_skus.join(", ")}` : "";
+        throw new Error((data.error || `Request failed (${response.status})`) + detail);
       }
-      const data = await response.json();
-
-      if (data.recommendations.length === 0) {
-        result.className = "show ok";
-        result.innerHTML = `Model: ${data.model}<br><br>No rules matched this cart -- try a different SKU combination.`;
-      } else {
-        const items = data.recommendations.map(r => `
-          <li>
-            <span>${r.product_name} <span class="meta">(${r.sku})</span></span>
-            <span class="meta">conf ${r.confidence} &middot; lift ${r.lift}</span>
-          </li>`).join("");
-        result.className = "show ok";
-        result.innerHTML = `Model: ${data.model}<ul class="recs">${items}</ul>`;
+      if (!Array.isArray(data.recommendations)) throw new Error("The API returned an unexpected response.");
+      result.className = "show ok";
+      result.textContent = data.recommendations.length
+        ? `Model: ${data.model}`
+        : "No rules matched this cart. Try a different product combination.";
+      const list = document.createElement("ul");
+      list.className = "recs";
+      for (const recommendation of data.recommendations) {
+        const item = document.createElement("li");
+        const name = document.createElement("span");
+        name.textContent = `${recommendation.product_name} (${recommendation.sku})`;
+        const meta = document.createElement("span");
+        meta.className = "meta";
+        meta.textContent = `Confidence ${(recommendation.confidence * 100).toFixed(2)}% | Lift ${Number(recommendation.lift).toFixed(2)}`;
+        item.append(name, meta);
+        list.append(item);
       }
-    } catch (err) {
-      result.className = "show err";
-      result.textContent = "Request failed: " + err.message +
-        " (is api.py running on http://127.0.0.1:5000 ?)";
+      if (data.recommendations.length) result.append(list);
+    } catch (error) {
+      showError(error.name === "AbortError" ? "The API took too long to respond. Try again."
+        : error instanceof TypeError ? "Cannot reach the API. Check the API address and that api.py is running."
+        : error.message);
     } finally {
+      clearTimeout(timeout);
       submitBtn.disabled = false;
       submitBtn.textContent = "Get Recommendations";
     }

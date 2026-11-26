@@ -1,0 +1,1197 @@
+{
+  "tested_at": "2026-11-26T13:17:54.816656+03:00",
+  "endpoint": "http://127.0.0.1:5000/api/v1/models/ecommerce-recommender/predictions",
+  "artifact": "model\\apriori_recommendation_rules.joblib",
+  "artifact_sha256": "37d1165ccb447553088fb5c9c98743c08e7e37063580619bdf1162fabd79f835",
+  "saved_rule_count": 56,
+  "distinct_antecedent_baskets_verified": 40,
+  "all_checks_passed": true,
+  "requests": [
+    {
+      "request": {
+        "cart": [
+          "E01"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "E01"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.6,
+            "lift": 6.9606,
+            "product_name": "Screen Protector",
+            "sku": "E02"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "E01",
+          "E04"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "E01",
+          "E04"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.8406,
+            "lift": 9.7515,
+            "product_name": "Screen Protector",
+            "sku": "E02"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "E02",
+          "E04"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "E02",
+          "E04"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.8286,
+            "lift": 10.3571,
+            "product_name": "Phone Case",
+            "sku": "E01"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "E04",
+          "E09"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "E04",
+          "E09"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.8936,
+            "lift": 10.8713,
+            "product_name": "Power Bank 10000mAh",
+            "sku": "E05"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "E05"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "E05"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.5888,
+            "lift": 6.2773,
+            "product_name": "Fast Phone Charger",
+            "sku": "E04"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "E05",
+          "E09"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "E05",
+          "E09"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.9767,
+            "lift": 10.4131,
+            "product_name": "Fast Phone Charger",
+            "sku": "E04"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "E08"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "E08"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.6078,
+            "lift": 6.8916,
+            "product_name": "Smartwatch",
+            "sku": "E07"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "F01"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "F01"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.5237,
+            "lift": 7.2937,
+            "product_name": "Running Socks (3-Pack)",
+            "sku": "F02"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "F01",
+          "F03"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "F01",
+          "F03"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.8778,
+            "lift": 12.2253,
+            "product_name": "Running Socks (3-Pack)",
+            "sku": "F02"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "F02",
+          "F03"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "F02",
+          "F03"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.908,
+            "lift": 11.948,
+            "product_name": "Running Shoes",
+            "sku": "F01"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "F04"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "F04"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.5995,
+            "lift": 6.4181,
+            "product_name": "Sports Water Bottle",
+            "sku": "F03"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "F05"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "F05"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.5878,
+            "lift": 7.239,
+            "product_name": "Gym Bag",
+            "sku": "F07"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "F05",
+          "F06"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "F05",
+          "F06"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.8851,
+            "lift": 10.8997,
+            "product_name": "Gym Bag",
+            "sku": "F07"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "F06",
+          "F07"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "F06",
+          "F07"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.8851,
+            "lift": 10.7934,
+            "product_name": "Yoga Mat",
+            "sku": "F05"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "H01"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "H01"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.6204,
+            "lift": 7.231,
+            "product_name": "Coffee Pods (Pack of 20)",
+            "sku": "H02"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "H01",
+          "H05"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "H01",
+          "H05"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.8871,
+            "lift": 10.3391,
+            "product_name": "Coffee Pods (Pack of 20)",
+            "sku": "H02"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "H02",
+          "H05"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "H02",
+          "H05"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.8871,
+            "lift": 11.6112,
+            "product_name": "Coffee Maker",
+            "sku": "H01"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "H03",
+          "H07"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "H03",
+          "H07"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.9242,
+            "lift": 12.5236,
+            "product_name": "Tea Infuser",
+            "sku": "H06"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "H06"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "H06"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.5556,
+            "lift": 7.5279,
+            "product_name": "Electric Kettle",
+            "sku": "H03"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "H06",
+          "H07"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "H06",
+          "H07"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.9385,
+            "lift": 12.7163,
+            "product_name": "Electric Kettle",
+            "sku": "H03"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "O01"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "O01"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.5867,
+            "lift": 7.3521,
+            "product_name": "Laptop Stand",
+            "sku": "O03"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "O01",
+          "O02"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "O01",
+          "O02"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.9751,
+            "lift": 12.2193,
+            "product_name": "Laptop Stand",
+            "sku": "O03"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "O01",
+          "O02",
+          "O04"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "O01",
+          "O02",
+          "O04"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.9825,
+            "lift": 12.3115,
+            "product_name": "Laptop Stand",
+            "sku": "O03"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "O01",
+          "O03",
+          "O04"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "O01",
+          "O03",
+          "O04"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.9825,
+            "lift": 13.1344,
+            "product_name": "Wireless Mouse",
+            "sku": "O02"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "O01",
+          "O04"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "O01",
+          "O04"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.8382,
+            "lift": 11.2064,
+            "product_name": "Wireless Mouse",
+            "sku": "O02"
+          },
+          {
+            "confidence": 0.8382,
+            "lift": 10.5042,
+            "product_name": "Laptop Stand",
+            "sku": "O03"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "O02"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "O02"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.6497,
+            "lift": 8.142,
+            "product_name": "Laptop Stand",
+            "sku": "O03"
+          },
+          {
+            "confidence": 0.6444,
+            "lift": 7.653,
+            "product_name": "Laptop Bag",
+            "sku": "O01"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "O02",
+          "O03"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "O02",
+          "O03"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.9671,
+            "lift": 11.4855,
+            "product_name": "Laptop Bag",
+            "sku": "O01"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "O02",
+          "O03",
+          "O04"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "O02",
+          "O03",
+          "O04"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 1.0,
+            "lift": 11.8765,
+            "product_name": "Laptop Bag",
+            "sku": "O01"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "O02",
+          "O04"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "O02",
+          "O04"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.9048,
+            "lift": 10.7454,
+            "product_name": "Laptop Bag",
+            "sku": "O01"
+          },
+          {
+            "confidence": 0.8889,
+            "lift": 17.9937,
+            "product_name": "Laptop Stand",
+            "sku": "O03"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "O03",
+          "O04"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "O03",
+          "O04"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.8636,
+            "lift": 10.257,
+            "product_name": "Laptop Bag",
+            "sku": "O01"
+          },
+          {
+            "confidence": 0.8485,
+            "lift": 17.6034,
+            "product_name": "Wireless Mouse",
+            "sku": "O02"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "P01"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "P01"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.5778,
+            "lift": 7.3515,
+            "product_name": "Memory Card 128GB",
+            "sku": "P02"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "P01",
+          "P02",
+          "P04"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "P01",
+          "P02",
+          "P04"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 1.0,
+            "lift": 12.8866,
+            "product_name": "Camera Bag",
+            "sku": "P03"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "P01",
+          "P03"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "P01",
+          "P03"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.9486,
+            "lift": 12.0689,
+            "product_name": "Memory Card 128GB",
+            "sku": "P02"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "P01",
+          "P03",
+          "P04"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "P01",
+          "P03",
+          "P04"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.9867,
+            "lift": 12.553,
+            "product_name": "Memory Card 128GB",
+            "sku": "P02"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "P01",
+          "P04"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "P01",
+          "P04"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.9036,
+            "lift": 11.6445,
+            "product_name": "Camera Bag",
+            "sku": "P03"
+          },
+          {
+            "confidence": 0.8916,
+            "lift": 18.1952,
+            "product_name": "Memory Card 128GB",
+            "sku": "P02"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "P02",
+          "P03"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "P02",
+          "P03"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.9796,
+            "lift": 11.5518,
+            "product_name": "Digital Camera",
+            "sku": "P01"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "P02",
+          "P03",
+          "P04"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "P02",
+          "P03",
+          "P04"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.9867,
+            "lift": 11.6352,
+            "product_name": "Digital Camera",
+            "sku": "P01"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "P02",
+          "P04"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "P02",
+          "P04"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.8721,
+            "lift": 11.2383,
+            "product_name": "Camera Bag",
+            "sku": "P03"
+          },
+          {
+            "confidence": 0.8605,
+            "lift": 17.0052,
+            "product_name": "Digital Camera",
+            "sku": "P01"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "P03"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "P03"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.6521,
+            "lift": 7.6894,
+            "product_name": "Digital Camera",
+            "sku": "P01"
+          },
+          {
+            "confidence": 0.6314,
+            "lift": 8.0336,
+            "product_name": "Memory Card 128GB",
+            "sku": "P02"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "P03",
+          "P04"
+        ],
+        "top_n": 20
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "P03",
+          "P04"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.9494,
+            "lift": 12.0785,
+            "product_name": "Memory Card 128GB",
+            "sku": "P02"
+          },
+          {
+            "confidence": 0.9494,
+            "lift": 11.1954,
+            "product_name": "Digital Camera",
+            "sku": "P01"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "H06",
+          "H07"
+        ],
+        "top_n": 3
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "H06",
+          "H07"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": [
+          {
+            "confidence": 0.9385,
+            "lift": 12.7163,
+            "product_name": "Electric Kettle",
+            "sku": "H03"
+          }
+        ]
+      }
+    },
+    {
+      "request": {},
+      "status": 400,
+      "response": {
+        "error": "cart must be a non-empty list of product SKUs"
+      }
+    },
+    {
+      "request": {
+        "cart": []
+      },
+      "status": 400,
+      "response": {
+        "error": "cart must be a non-empty list of product SKUs"
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "UNKNOWN"
+        ]
+      },
+      "status": 400,
+      "response": {
+        "error": "Unknown product SKUs",
+        "unknown_skus": [
+          "UNKNOWN"
+        ]
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "H06"
+        ],
+        "top_n": 0
+      },
+      "status": 400,
+      "response": {
+        "error": "top_n must be an integer between 1 and 20"
+      }
+    },
+    {
+      "request": {
+        "cart": [
+          "E02",
+          "H06",
+          "E04",
+          "O01",
+          "O02",
+          "O03",
+          "H03",
+          "F05",
+          "P05",
+          "P03",
+          "F07",
+          "E09",
+          "E06",
+          "E05",
+          "E07",
+          "E08",
+          "H05",
+          "H07",
+          "H01",
+          "H02",
+          "H04",
+          "F01",
+          "F02",
+          "E01",
+          "P01",
+          "P02",
+          "E10",
+          "O05",
+          "F04",
+          "F03",
+          "O06",
+          "P04",
+          "E03",
+          "F06",
+          "O04"
+        ]
+      },
+      "status": 200,
+      "response": {
+        "cart": [
+          "E01",
+          "E02",
+          "E03",
+          "E04",
+          "E05",
+          "E06",
+          "E07",
+          "E08",
+          "E09",
+          "E10",
+          "F01",
+          "F02",
+          "F03",
+          "F04",
+          "F05",
+          "F06",
+          "F07",
+          "H01",
+          "H02",
+          "H03",
+          "H04",
+          "H05",
+          "H06",
+          "H07",
+          "O01",
+          "O02",
+          "O03",
+          "O04",
+          "O05",
+          "O06",
+          "P01",
+          "P02",
+          "P03",
+          "P04",
+          "P05"
+        ],
+        "model": "Apriori association rules",
+        "recommendations": []
+      }
+    }
+  ]
+}

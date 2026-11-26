@@ -19,7 +19,7 @@ MODEL_DIR = Path(__file__).resolve().parent.parent / "model"
 REGRESSION_FILE = "20261124_171555_ridge_regressor_for_rental_price.joblib"
 CLASSIFICATION_FILE = "svc_classifier_for_sme_credit_risk.joblib"
 CLUSTERING_FILE = "retail_store_kmeans_model.joblib"
-RECOMMENDER_FILE = "music_track_recommender.joblib"         # Marwa -- change to her exact name
+RECOMMENDER_FILE = "music_track_recommender.joblib"         # Recommender integration filename
 
 st.set_page_config(page_title="Group A8 -- Model Demos", page_icon="📊", layout="centered")
 
@@ -183,7 +183,7 @@ with tab_clu:
             st.success(f"**Cluster {cluster} -- {CLUSTER_NAMES[cluster]}**")
 
 # -------------------------------------------------------------------------
-# 4. RECOMMENDER -- music tracks (Marwa's Apriori rules). Expects the saved
+# 4. RECOMMENDER -- music tracks. Expects the saved
 # file to hold the final rules table and a track ID -> name lookup.
 # -------------------------------------------------------------------------
 def _split_recommender_artifact(artifact):
