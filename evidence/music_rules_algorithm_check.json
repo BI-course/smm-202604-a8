@@ -1,0 +1,7 @@
+{
+  "reference": "mlxtend FP-Growth + association_rules",
+  "itemsets_compared": 63,
+  "candidate_rules_compared": 110,
+  "all_metrics_equal_within": 1e-12,
+  "all_checks_passed": true
+}

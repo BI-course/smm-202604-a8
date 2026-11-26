@@ -6,7 +6,7 @@ const vm = require('node:vm');
 const assert = require('node:assert/strict');
 const test = require('node:test');
 
-const html = fs.readFileSync(path.join(__dirname, '../frontend/ecommerce_recommender.html'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '../frontend/music_track_recommender.html'), 'utf8');
 const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
 function setup(fetchResponse = async () => ({ok: true, json: async () => ({recommendations: []})})) {
@@ -20,9 +20,9 @@ function setup(fetchResponse = async () => ({ok: true, json: async () => ({recom
     };
   }
   const elements = {};
-  for (const id of ['predictForm', 'api_base', 'cart', 'top_n', 'result', 'submitBtn']) elements[id] = element();
+  for (const id of ['predictForm', 'api_base', 'track_ids', 'top_n', 'result', 'submitBtn']) elements[id] = element();
   elements.top_n.value = '3';
-  elements.cart.value = 'H06, H07';
+  elements.track_ids.value = 'M01, M03';
   const calls = [];
   const context = {
     document: {getElementById: id => elements[id], createElement: element},
@@ -34,14 +34,14 @@ function setup(fetchResponse = async () => ({ok: true, json: async () => ({recom
   return {elements, calls, submit: () => elements.predictForm.handler({preventDefault() {}})};
 }
 
-test('blank and comma-only carts show a clear error before any request', async () => {
+test('blank and comma-only track lists show a clear error before any request', async () => {
   for (const value of ['', '   ', ', ,']) {
     const page = setup();
-    page.elements.cart.value = value;
+    page.elements.track_ids.value = value;
     await page.submit();
-    assert.match(page.elements.result.textContent, /at least one product SKU/);
+    assert.match(page.elements.result.textContent, /at least one track ID/);
     assert.equal(page.calls.length, 0);
-    assert.equal(page.elements.cart.focused, true);
+    assert.equal(page.elements.track_ids.focused, true);
   }
 });
 
@@ -63,22 +63,22 @@ test('invalid API address is rejected', async () => {
   assert.equal(page.calls.length, 0);
 });
 
-test('deduplicates SKUs and renders product names as text', async () => {
+test('deduplicates track IDs and renders track names as text', async () => {
   const page = setup(async () => ({ok: true, json: async () => ({
-    model: 'Apriori', recommendations: [{sku: 'H03', product_name: '<b>Product</b>', confidence: .8, lift: 2}],
+    model: 'Music Apriori', recommendations: [{track_id: 'M02', track_name: '<b>Track</b>', confidence: .8, lift: 2, support: .1}],
   })}));
-  page.elements.cart.value = ' H06, H07, H06 ';
+  page.elements.track_ids.value = ' M01, M03, M01 ';
   await page.submit();
-  assert.deepEqual(JSON.parse(page.calls[0][1].body), {cart: ['H06', 'H07'], top_n: 3});
+  assert.deepEqual(JSON.parse(page.calls[0][1].body), {track_ids: ['M01', 'M03'], top_n: 3});
   const item = page.elements.result.children[0].children[0];
-  assert.equal(item.children[0].textContent, '<b>Product</b> (H03)');
+  assert.equal(item.children[0].textContent, '<b>Track</b> (M02)');
   assert.equal(page.elements.submitBtn.disabled, false);
 });
 
 test('server validation errors and empty results are readable', async () => {
-  const failure = setup(async () => ({ok: false, json: async () => ({error: 'Unknown product SKUs', unknown_skus: ['BAD']})}));
+  const failure = setup(async () => ({ok: false, json: async () => ({error: 'Unknown track IDs', unknown_track_ids: ['BAD']})}));
   await failure.submit();
-  assert.equal(failure.elements.result.textContent, 'Unknown product SKUs: BAD');
+  assert.equal(failure.elements.result.textContent, 'Unknown track IDs: BAD');
   const empty = setup();
   await empty.submit();
   assert.match(empty.elements.result.textContent, /No rules matched/);
@@ -89,6 +89,6 @@ test('page script displays a real prediction from the running Flask API', async 
   await page.submit();
   assert.equal(page.elements.result.className, 'show ok');
   const item = page.elements.result.children[0].children[0];
-  assert.equal(item.children[0].textContent, 'Electric Kettle (H03)');
-  assert.equal(item.children[1].textContent, 'Confidence 93.85% | Lift 12.72');
+  assert.equal(item.children[0].textContent, 'Pump It Up (M02)');
+  assert.equal(item.children[1].textContent, 'Confidence 86.75% | Lift 5.95 | Support 3.89%');
 });

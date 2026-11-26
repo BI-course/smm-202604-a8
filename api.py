@@ -196,60 +196,61 @@ def predict_store_cluster():
 
 
 # ---------------------------------------------------------------
-# 4. RECOMMENDER (David Usyu Mutinda, 169382) -- association-rule product recommendations
+# 4. RECOMMENDER (David Usyu Mutinda, 169382) -- music association rules
 # ---------------------------------------------------------------
-# Load the existing mined rules once. No training or rule mining happens here.
+# Load the persisted music rules once. Mining lives in scripts/build_music_rules.py.
 recommender_artifact = joblib.load(
-    os.path.join(MODEL_DIR, "apriori_recommendation_rules.joblib")
+    os.path.join(MODEL_DIR, "music_track_recommender.joblib")
 )
 recommendation_lookup = recommender_artifact["recommendation_lookup"]
-sku_lookup = recommender_artifact["sku_lookup"]
+track_id_to_name = recommender_artifact["track_id_to_name"]
 
 
-@app.route("/api/v1/models/ecommerce-recommender/predictions", methods=["POST"])
-def recommend_products():
+@app.route("/api/v1/models/music-track-recommender/predictions", methods=["POST"])
+def recommend_tracks():
     payload = request.get_json(silent=True)
     if not isinstance(payload, dict):
-        return jsonify({"error": "Send a JSON object with a cart list"}), 400
+        return jsonify({"error": "Send a JSON object with a track_ids list"}), 400
 
-    cart = payload.get("cart")
-    if not isinstance(cart, list) or not cart:
-        return jsonify({"error": "cart must be a non-empty list of product SKUs"}), 400
-    if any(not isinstance(sku, str) or not sku.strip() for sku in cart):
-        return jsonify({"error": "Each cart SKU must be a non-empty string"}), 400
+    track_ids = payload.get("track_ids")
+    if not isinstance(track_ids, list) or not track_ids:
+        return jsonify({"error": "track_ids must be a non-empty list of track IDs"}), 400
+    if any(not isinstance(track, str) or not track.strip() for track in track_ids):
+        return jsonify({"error": "Each track ID must be a non-empty string"}), 400
 
-    top_n = payload.get("top_n", 3)
+    top_n = payload.get("top_n", 5)
     if type(top_n) is not int or not 1 <= top_n <= 20:
         return jsonify({"error": "top_n must be an integer between 1 and 20"}), 400
 
-    cart = {sku.strip() for sku in cart}
-    unknown = sorted(cart.difference(sku_lookup.index))
+    played = {track.strip() for track in track_ids}
+    unknown = sorted(played.difference(track_id_to_name))
     if unknown:
-        return jsonify({"error": "Unknown product SKUs", "unknown_skus": unknown}), 400
+        return jsonify({"error": "Unknown track IDs", "unknown_track_ids": unknown}), 400
 
-    # A rule fires only when ALL its antecedents are in the cart. Keep each
-    # unseen product's strongest rule, ranked by confidence then lift.
+    # Match full antecedents; exclude played tracks; keep the strongest
+    # confidence/lift/support evidence for each unseen track.
     best = {}
     for antecedent, candidates in recommendation_lookup.items():
-        if antecedent.issubset(cart):
-            for sku, confidence, lift in candidates:
-                score = (float(confidence), float(lift))
-                if sku not in cart and (sku not in best or score > best[sku]):
-                    best[sku] = score
+        if antecedent.issubset(played):
+            for track, confidence, lift, support in candidates:
+                score = (float(confidence), float(lift), float(support))
+                if track not in played and (track not in best or score > best[track]):
+                    best[track] = score
 
-    ranked = sorted(best.items(), key=lambda item: (-item[1][0], -item[1][1], item[0]))[:top_n]
+    ranked = sorted(best.items(), key=lambda item: tuple(-v for v in item[1]) + (item[0],))[:top_n]
     return jsonify({
-        "cart": sorted(cart),
+        "track_ids": sorted(played),
         "recommendations": [
             {
-                "sku": sku,
-                "product_name": str(sku_lookup.loc[sku, "product_name"]),
+                "track_id": track,
+                "track_name": track_id_to_name[track],
                 "confidence": round(confidence, 4),
                 "lift": round(lift, 4),
+                "support": round(support, 4),
             }
-            for sku, (confidence, lift) in ranked
+            for track, (confidence, lift, support) in ranked
         ],
-        "model": "Apriori association rules",
+        "model": "Music track association rules (Apriori)",
     }), 200
 
 

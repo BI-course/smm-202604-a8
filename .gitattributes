@@ -7,3 +7,6 @@
 # `*.sh text eol=lf` – Ensures that all shell script files (*.sh) are checked out with "LF"(Unix-style) line endings, regardless of the platform (text eol=lf).
 * text=auto
 *.sh text eol=lf
+
+# Preserve the downloaded dataset bytes used by the provenance SHA-256.
+/data/music_streaming_sessions.csv text eol=lf

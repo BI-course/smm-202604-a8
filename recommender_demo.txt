@@ -1,86 +1,96 @@
-David Usyu Mutinda (169382): association-rules endpoint and HTML/CSS/JS page
+David Usyu Mutinda (169382): music association-rules endpoint and HTML page
 
 Repository: smm-202604-a8
-Branch: feature/recommender
+Contribution branch: feature/recommender
 David and Marwa swapped duties: David completed the recommender and HTML page;
-Marwa completed the clustering endpoint and Streamlit app.
+Marwa completed clustering and Streamlit.
 
-What works
-POST /api/v1/models/ecommerce-recommender/predictions
-Loads model/apriori_recommendation_rules.joblib once at startup.
-Uses the existing association rules; no training or rule mining in api.py.
-Returns product names, SKUs, confidence and lift.
-Validates missing/empty carts, invalid SKU types, unknown SKUs and top_n.
+Music artifact
+model/music_track_recommender.joblib contains:
+- rules_final: 15 final music association rules, including temporal audit scores
+- track_id_to_name: all 16 track IDs mapped to real track names
+- track_lookup_df: track names and categories
+- recommendation_lookup: precomputed candidates with confidence/lift/support
+- metadata: dataset SHA-256, thresholds, split and build provenance
 
-The page is frontend/ecommerce_recommender.html.
-It shows clear errors for missing input, invalid counts, unknown products,
-connection failures and API errors. Blank/comma-only input sends no request.
-An editable API address supports local Flask and deployed API servers.
+This newly generated artifact completes the unfinished earlier-lab notebook.
+It is not a recovered copy of historical group rules. The old product artifact
+is retained as an unused lecturer example; the group endpoint serves music.
 
-Start the API (PowerShell, from smm-202604-a8)
+Source data and reproducibility
+The snapshot is data/music_streaming_sessions.csv (9,915 rows, 4,200 sessions).
+Source URL:
+https://raw.githubusercontent.com/course-files/ClusteringandAssociationRuleMining/main/data/music_streaming_sessions.csv
+
+Run offline mining separately (PowerShell, from smm-202604-a8):
+  ..\.venv\Scripts\python.exe scripts/build_music_rules.py
+
+Apriori uses the notebook's 1% support threshold. The newly selected confidence
+threshold 0.5 selects majority co-listening above the training candidate upper
+quartile (~0.412); lift 1.2 requires at least 20% above baseline. See the build
+report for the observed candidate metric distribution and rationale.
+Rules are mined on 3,365 sessions dated on/before 2025-05-24, then audited on
+835 later sessions. No later scores select or remove deployed rules.
+63 frequent itemsets -> 110 candidate rules -> 22 threshold-passing rules ->
+22 after subset pruning -> 15 after removing reverse-direction duplicates.
+All 15 still meet the confidence/lift thresholds in the held-out audit.
+
+Start API
   ..\.venv\Scripts\python.exe api.py
 
-Open frontend/ecommerce_recommender.html in a browser.
-Keep API address http://127.0.0.1:5000 and click Get Recommendations.
-The default cart is H06, H07. It should recommend Electric Kettle (H03),
-confidence 0.9385 (93.85%), lift 12.7163.
-Delete the cart contents and submit to demonstrate the missing-input error.
+Open frontend/music_track_recommender.html in your browser.
+Keep the API address http://127.0.0.1:5000.
+The default input M01, M03 recommends Pump It Up (M02):
+confidence 0.8675 (86.75%), lift 5.9456, support 0.0389.
+Delete the track IDs and submit to demonstrate the missing-input error.
+The older ecommerce_recommender.html URL redirects to the music page.
 
-Saved working request (Git Bash)
-  curl -X POST http://127.0.0.1:5000/api/v1/models/ecommerce-recommender/predictions -H "Content-Type: application/json" --data-raw '{"cart":["H06","H07"],"top_n":3}'
+Working request (Git Bash)
+  curl -X POST http://127.0.0.1:5000/api/v1/models/music-track-recommender/predictions -H "Content-Type: application/json" --data-raw '{"track_ids":["M01","M03"],"top_n":5}'
 
-Saved working request (PowerShell)
-  Invoke-RestMethod -Method Post -Uri http://127.0.0.1:5000/api/v1/models/ecommerce-recommender/predictions -ContentType application/json -Body '{"cart":["H06","H07"],"top_n":3}'
+Working request (PowerShell)
+  Invoke-RestMethod -Method Post -Uri http://127.0.0.1:5000/api/v1/models/music-track-recommender/predictions -ContentType application/json -Body '{"track_ids":["M01","M03"],"top_n":5}'
 
-Verification completed
-- 8 API tests against the actual saved artifact, including comparisons with
-  the final rules table for all 40 distinct saved antecedent baskets.
-- 46 live HTTP checks: correct recommendations, product names and scores;
-  missing/empty carts; unknown SKUs; invalid counts; already-selected products;
-  and CORS headers for opening the frontend directly as a local HTML file.
-- 6 page-script tests, including a real Flask request and missing-input errors.
-  These execute the JavaScript with a minimal DOM adapter; full visual browser
-  inspection and the group's video recording are still to be performed.
-
-Re-run tests (keep the API running for the last two commands)
+Verification
   ..\.venv\Scripts\python.exe -m unittest discover -s tests -v
+With the API running:
   ..\.venv\Scripts\python.exe scripts/verify_recommender.py
   node --test tests/test_recommender_page.cjs
 
-Live HTTP evidence: evidence/recommender_live_test.json
-The verifier saves requests, responses, the artifact SHA-256 and test time.
+Nine API tests check saved scores against source sessions, every saved rule
+antecedent, ranking, exclusions, and input errors. The live verifier checks
+21 HTTP requests across all 15 saved antecedent baskets plus error cases.
+Six page-script tests include a real Flask prediction and missing-input errors.
+They use a minimal DOM adapter, not full visual browser inspection.
+All 63 frequent itemsets and 110 candidate-rule metrics were independently
+cross-checked against mlxtend FP-Growth/association_rules within 1e-12.
 
-Artifact compatibility fix
-The original saved file used a pandas string dtype that failed to deserialize
-under the repository's pinned pandas 2.2.3. The same data was exported through
-an isolated pandas environment and re-saved using pandas 2.2.3. All 56 rules,
-the complete recommendation lookup, all 35 product records and their scores
-were compared and preserved exactly. The model was never retrained.
-The original binary backup is outside the repository at
-../.artifact-inspection/original_apriori_recommendation_rules.joblib.
-The API uses the normal pinned environment and needs no inspection packages.
+Evidence
+- evidence/music_rules.csv: readable rules with real track names
+- evidence/music_rules_build.json: mining provenance and temporal audit
+- evidence/music_rules_algorithm_check.json: independent mining cross-check
+- evidence/recommender_live_test.json: live HTTP requests and responses
 
-Setup on a fresh machine
+API behavior
+POST /api/v1/models/music-track-recommender/predictions
+Body: {"track_ids": ["M01", "M03"], "top_n": 5}
+Match all rules whose full antecedent is among the played tracks. Exclude
+already-played tracks, combine evidence from all matching rules by retaining
+the strongest confidence/lift/support score per candidate, then rank.
+Ties use track ID for deterministic output. top_n defaults to 5 (range 1-20).
+Invalid, missing, empty or unknown track IDs return HTTP 400 JSON errors.
+Known inputs with no eligible recommendations return HTTP 200 and an empty list.
+
+Fresh-machine setup
   python -m venv venv
   .\venv\Scripts\python.exe -m pip install -r requirements/base.txt -c requirements/constraints.txt
   .\venv\Scripts\python.exe api.py
-Use .\venv\Scripts\python.exe instead of ..\.venv\Scripts\python.exe
-for the verification commands on that machine.
+Use .\venv\Scripts\python.exe for the other commands on that machine.
+The checked-in music artifact is built with the pinned pandas 2.2.3.
+Mining needs only the normal pandas/joblib dependencies; no extra packages.
 
-API behavior
-Request: {"cart": ["H06", "H07"], "top_n": 3}
-Every rule's full antecedent must be in the cart to match.
-Products already in the cart are excluded. Duplicate recommendations are
-ranked by confidence, then lift, then SKU for stable ties.
-top_n defaults to 3 and accepts integers from 1 to 20.
-Known carts with no eligible recommendations return HTTP 200 and an empty list.
-Invalid inputs return HTTP 400 with a JSON error message.
-
-Scope
-The supplied saved artifact contains e-commerce product rules, so this
-implementation uses product SKUs and product names. Other API model sections
-are unchanged. Their existing scikit-learn version warnings still appear at
-startup; those warnings do not concern this association-rules artifact.
-The submission file credits Marwa with clustering/Streamlit and David with
-the recommender endpoint, HTML page, compatibility fix and verification.
-Contribution branch: feature/recommender.
+The API never mines rules or retrains. Regression, classification and clustering
+sections retain their behavior. Existing classifier version warnings at startup
+are unrelated to the music artifact. Streamlit recognizes the same music file
+and uses the same confidence/lift/support ranking. The group still needs to
+record its required browser/video demonstration and verify public deployments.

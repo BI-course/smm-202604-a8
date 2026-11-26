@@ -19,7 +19,7 @@ MODEL_DIR = Path(__file__).resolve().parent.parent / "model"
 REGRESSION_FILE = "20261124_171555_ridge_regressor_for_rental_price.joblib"
 CLASSIFICATION_FILE = "svc_classifier_for_sme_credit_risk.joblib"
 CLUSTERING_FILE = "retail_store_kmeans_model.joblib"
-RECOMMENDER_FILE = "music_track_recommender.joblib"         # Recommender integration filename
+RECOMMENDER_FILE = "music_track_recommender.joblib"         # Same saved music artifact as api.py
 
 st.set_page_config(page_title="Group A8 -- Model Demos", page_icon="📊", layout="centered")
 
@@ -222,11 +222,12 @@ with tab_rec:
                 for _, r in rules.iterrows():
                     if set(r["antecedents"]).issubset(played):
                         for track in r["consequents"]:
-                            if track not in played and (track not in best or r["confidence"] > best[track][0]):
-                                best[track] = (r["confidence"], r["lift"])
-                ranked = sorted(best.items(), key=lambda kv: kv[1], reverse=True)[:int(top_n)]
+                            if track not in played:
+                                score = (float(r["confidence"]), float(r["lift"]), float(r["support"]))
+                                best[track] = max(best.get(track, score), score)
+                ranked = sorted(best.items(), key=lambda kv: tuple(-v for v in kv[1]) + (kv[0],))[:int(top_n)]
                 if not ranked:
                     st.info("No rule matches these tracks. Try tracks that appear often together.")
-                for track, (conf, lift) in ranked:
+                for track, (conf, lift, support) in ranked:
                     st.write(f"**{id_to_name.get(track, track)}** ({track}) -- "
-                             f"confidence {conf:.1%}, lift {lift:.2f}")
+                             f"confidence {conf:.1%}, lift {lift:.2f}, support {support:.1%}")

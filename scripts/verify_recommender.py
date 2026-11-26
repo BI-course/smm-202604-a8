@@ -16,11 +16,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:5000")
     args = parser.parse_args()
-    endpoint = args.base_url.rstrip("/") + "/api/v1/models/ecommerce-recommender/predictions"
-    model_path = ROOT / "model/apriori_recommendation_rules.joblib"
+    endpoint = args.base_url.rstrip("/") + "/api/v1/models/music-track-recommender/predictions"
+    model_path = ROOT / "model/music_track_recommender.joblib"
     artifact = joblib.load(model_path)
-    rules = artifact["cleaned_rules"]
-    lookup = artifact["sku_lookup"]
+    rules = artifact["rules_final"]
+    lookup = artifact["track_id_to_name"]
     records = []
 
     def post(payload, expected_status):
@@ -39,25 +39,26 @@ def main():
         best = {}
         for _, rule in rules.iterrows():
             if set(rule["antecedents"]).issubset(played):
-                for sku in rule["consequents"]:
-                    if sku not in played:
-                        score = (float(rule["confidence"]), float(rule["lift"]))
-                        best[sku] = max(best.get(sku, score), score)
-        ranked = sorted(best, key=lambda sku: (-best[sku][0], -best[sku][1], sku))[:20]
+                for track in rule["consequents"]:
+                    if track not in played:
+                        score = (float(rule["confidence"]), float(rule["lift"]), float(rule["support"]))
+                        best[track] = max(best.get(track, score), score)
+        ranked = sorted(best, key=lambda track: (-best[track][0], -best[track][1], -best[track][2], track))[:20]
         expected = [{
-            "sku": sku, "product_name": str(lookup.loc[sku, "product_name"]),
-            "confidence": round(best[sku][0], 4), "lift": round(best[sku][1], 4),
-        } for sku in ranked]
-        actual = post({"cart": list(basket), "top_n": 20}, 200)
+            "track_id": track, "track_name": lookup[track],
+            "confidence": round(best[track][0], 4), "lift": round(best[track][1], 4),
+            "support": round(best[track][2], 4),
+        } for track in ranked]
+        actual = post({"track_ids": list(basket), "top_n": 20}, 200)
         assert actual["recommendations"] == expected, (basket, actual, expected)
 
-    demo = post({"cart": ["H06", "H07"], "top_n": 3}, 200)
-    assert demo["recommendations"][0]["product_name"] == "Electric Kettle"
+    demo = post({"track_ids": ["M01", "M03"], "top_n": 3}, 200)
+    assert demo["recommendations"][0]["track_name"] == "Pump It Up"
     post({}, 400)
-    post({"cart": []}, 400)
-    post({"cart": ["UNKNOWN"]}, 400)
-    post({"cart": ["H06"], "top_n": 0}, 400)
-    empty = post({"cart": list(lookup.index)}, 200)
+    post({"track_ids": []}, 400)
+    post({"track_ids": ["UNKNOWN"]}, 400)
+    post({"track_ids": ["M01"], "top_n": 0}, 400)
+    empty = post({"track_ids": list(lookup)}, 200)
     assert empty["recommendations"] == []
 
     report = {
