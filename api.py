@@ -62,41 +62,77 @@ def predict_rental_price():
     })
 
 
+
 # ---------------------------------------------------------------
-# 2. CLASSIFICATION (Gibson) -- SME credit risk
+# 2. CLASSIFICATION (Gibson) -- Employee attrition
 # ---------------------------------------------------------------
 
-classification_model = joblib.load(
-    os.path.join(MODEL_DIR, "svc_classifier_for_sme_credit_risk.joblib")
+# Load the saved, fitted employee attrition pipeline once at startup.
+employee_attrition_model = joblib.load(
+    os.path.join(
+        MODEL_DIR,
+        "employee_attrition_tuned_pipeline.joblib"
+    )
 )
 
-CLASSIFICATION_FEATURES = [
-    "sector", "county", "quarter", "loan_purpose",
-    "owner_education_level", "business_age_years",
-    "num_employees", "monthly_revenue_kes",
-    "loan_amount_kes", "loan_term_months",
-    "interest_rate_pct", "collateral_value_kes",
-    "debt_to_income_ratio", "credit_score",
-    "num_previous_loans", "missed_payments_count",
-    "online_presence_score", "customer_satisfaction_score",
-    "competitor_density",
+# Exact input features and order used during model training.
+EMPLOYEE_ATTRITION_FEATURES = [
+    "years_since_last_promotion",
+    "monthly_salary_kes",
+    "overtime_hours_per_month",
+    "job_satisfaction_score",
+    "work_life_balance_score",
+    "distance_from_home_km",
+    "num_companies_worked_previously",
+    "remote_work_days_per_week",
+    "bonus_amount_kes",
+    "department",
+    "job_role_level",
+    "education_level",
+    "performance_rating",
+]
+
+# Features that must contain numeric values.
+EMPLOYEE_ATTRITION_NUMERIC_FEATURES = [
+    "years_since_last_promotion",
+    "monthly_salary_kes",
+    "overtime_hours_per_month",
+    "job_satisfaction_score",
+    "work_life_balance_score",
+    "distance_from_home_km",
+    "num_companies_worked_previously",
+    "remote_work_days_per_week",
+    "bonus_amount_kes",
+]
+
+# Categorical features.
+EMPLOYEE_ATTRITION_CATEGORICAL_FEATURES = [
+    "department",
+    "job_role_level",
+    "education_level",
+    "performance_rating",
 ]
 
 
 @app.route(
-    "/api/v1/models/sme-credit-risk-classifier/predictions",
+    "/api/v1/models/employee-attrition-classifier/predictions",
     methods=["POST"]
 )
-def predict_credit_risk():
+def predict_employee_attrition():
 
     payload = request.get_json(silent=True)
 
-    if not payload:
-        return jsonify({"error": "Send a JSON body"}), 400
+    if not isinstance(payload, dict):
+        return jsonify({
+            "error": "Send a valid JSON object"
+        }), 400
 
+    # Check for missing features.
     missing = [
-        feature for feature in CLASSIFICATION_FEATURES
-        if feature not in payload
+        feature
+        for feature in EMPLOYEE_ATTRITION_FEATURES
+        if feature not in payload or payload[feature] is None
+        or payload[feature] == ""
     ]
 
     if missing:
@@ -106,29 +142,62 @@ def predict_credit_risk():
         }), 400
 
     try:
+        # Build input DataFrame using the exact training feature order.
         input_row = pd.DataFrame(
             [payload],
-            columns=CLASSIFICATION_FEATURES
+            columns=EMPLOYEE_ATTRITION_FEATURES
         )
 
-        pred = classification_model.predict(input_row)[0]
+        # Validate numeric fields.
+        for feature in EMPLOYEE_ATTRITION_NUMERIC_FEATURES:
+            input_row[feature] = pd.to_numeric(
+                input_row[feature],
+                errors="raise"
+            )
+
+            if not np.isfinite(input_row[feature].iloc[0]):
+                raise ValueError(
+                    f"{feature} must contain a finite number"
+                )
+
+        # Validate categorical fields.
+        for feature in EMPLOYEE_ATTRITION_CATEGORICAL_FEATURES:
+            if not isinstance(input_row[feature].iloc[0], str):
+                raise ValueError(
+                    f"{feature} must contain text"
+                )
+
+        # Predict using the complete fitted pipeline.
+        prediction = employee_attrition_model.predict(
+            input_row
+        )[0]
 
         result = {
-            "prediction": (
-                pred.item() if hasattr(pred, "item") else pred
-            ),
-            "model": "SVC Classifier - SME Credit Risk"
+            "prediction": str(prediction),
+            "model": "Tuned Logistic Regression - Employee Attrition"
         }
 
-        if hasattr(classification_model, "predict_proba"):
-            probs = classification_model.predict_proba(input_row)[0]
+        # Include class probabilities where supported.
+        if hasattr(employee_attrition_model, "predict_proba"):
+            probabilities = employee_attrition_model.predict_proba(
+                input_row
+            )[0]
+
+            classes = employee_attrition_model.classes_
 
             result["probabilities"] = {
-                str(c): float(p)
-                for c, p in zip(
-                    classification_model.classes_, probs
+                str(class_name): float(probability)
+                for class_name, probability in zip(
+                    classes,
+                    probabilities
                 )
             }
+
+            if "Yes" in classes:
+                yes_index = list(classes).index("Yes")
+                result["probability_of_attrition"] = float(
+                    probabilities[yes_index]
+                )
 
         return jsonify(result), 200
 
@@ -137,6 +206,7 @@ def predict_credit_risk():
             "error": "Invalid input values",
             "detail": str(e)
         }), 400
+
 
 # ---------------------------------------------------------------
 # 3. CLUSTERING (Marwa) -- retail stores
