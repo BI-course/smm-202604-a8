@@ -1,0 +1,53 @@
+# =============================================================================
+# Dockerfile.render -- the Flask + Gunicorn API, adapted for Render.
+#
+# Based on Dockerfile.flask-gunicorn-app (same base image, same pinned
+# requirements, same unmodified api.py and model/ files). Two differences,
+# both needed by Render:
+#   1. Port: Render tells the container which port to listen on through the
+#      PORT environment variable, so Gunicorn binds to $PORT (8000 if unset).
+#   2. Workers: Render's free plan has 512 MB of memory. Every Gunicorn worker
+#      loads all four models, so 5 workers can run out of memory. This uses
+#      WEB_CONCURRENCY (default 2) instead.
+#
+# Nginx is not used on Render: Render's own load balancer handles HTTPS and
+# forwards requests to this container, doing the reverse-proxy job that our
+# Nginx container does locally.
+#
+# Render settings: Dockerfile Path = ./dockerfiles/Dockerfile.render
+#                  Docker Build Context Directory = .
+# =============================================================================
+
+# ---------- Stage 1: install dependencies ----------
+FROM python:3.12.10-slim AS builder
+
+WORKDIR /build
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements/ ./requirements/
+
+# Same pinned versions as local Docker (scikit-learn 1.6.1, pandas 2.2.3,
+# numpy 2.4.6), so the saved models load the same way everywhere.
+RUN pip install --no-cache-dir --prefix=/install -r requirements/base.txt -c requirements/constraints.txt
+RUN pip install --no-cache-dir --prefix=/install -r requirements/prod.txt -c requirements/constraints.txt
+
+COPY api.py .
+COPY model/ model/
+
+# ---------- Stage 2: runtime image ----------
+FROM python:3.12.10-slim
+
+WORKDIR /opt/app-smm
+ENV PYTHONPATH=/opt/app-smm \
+    PYTHONUNBUFFERED=1
+
+COPY --from=builder /install /usr/local
+COPY --from=builder /build /opt/app-smm
+
+EXPOSE 8000
+
+# sh -c lets the ${PORT} and ${WEB_CONCURRENCY} values be filled in at start-up
+CMD ["sh", "-c", "gunicorn --chdir /opt/app-smm -w ${WEB_CONCURRENCY:-2} -b 0.0.0.0:${PORT:-8000} --timeout 120 api:app"]
