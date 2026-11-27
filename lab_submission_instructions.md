@@ -53,7 +53,7 @@
 
 Submit the link to a short video (**not more than 10 minutes**) demonstrating your complete solution at whichever difficulty level you chose. Please ensure that the lecturer has rights to view the video.
 
-At minimum, the video must show, in one continuous walkthrough:
+At minimum, the video must show, in one continuous walkthrough:https://youtu.be/ByOeUtY7wyY
 
 1. `api.py` running **locally**, with a live request/response against each model endpoint you implemented.
 2. If you attempted the Intermediate or Advanced tier: the same API running inside its **Gunicorn + Nginx Docker container**, reached through the reverse proxy, not the Flask development server.
